@@ -11,6 +11,19 @@ public:
     {
         numerator_ = numerator;
         denominator_ = denominator;
+
+        int gcd = findGCD(numerator, denominator); // Находим НОД
+        numerator_ = numerator / gcd;              // Нормализуем числитель
+        denominator_ = denominator / gcd;
+    }
+
+    int findGCD(int a, int b) {
+        while (b != 0) {
+            int temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
     }
 
     void print()
