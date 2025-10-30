@@ -1,4 +1,5 @@
 ﻿#include <iostream>
+#include <Windows.h>
 
 class Fraction
 {
@@ -6,19 +7,38 @@ private:
     int numerator_;
     int denominator_;
 
+    void normalize() 
+    {
+        if (denominator_ == 0) 
+        {
+            std::cerr << "Ошибка: знаменатель равен нулю!" << std::endl;
+            exit(1);
+        }
+        if (denominator_ < 0) 
+        {
+            numerator_ = -numerator_;
+            denominator_ = -denominator_;
+        }
+        int gcd = findGCD(numerator_, denominator_);
+        numerator_ /= gcd;
+        denominator_ /= gcd;
+    }
+
 public:
     Fraction(int numerator = 1, int denominator = 1)
     {
         numerator_ = numerator;
         denominator_ = denominator;
 
-        int gcd = findGCD(numerator, denominator); // Находим НОД
-        numerator_ = numerator / gcd;              // Нормализуем числитель
-        denominator_ = denominator / gcd;
+        normalize();
     }
 
-    int findGCD(int a, int b) {
-        while (b != 0) {
+    int findGCD(int a, int b) 
+    {
+        if (a < 0) a = -a;
+        if (b < 0) b = -b;
+        while (b != 0) 
+        {
             int temp = b;
             b = a % b;
             a = temp;
@@ -31,53 +51,54 @@ public:
         std::cout << numerator_ << "/" << denominator_;
     }
 
-    Fraction operator+(Fraction right)
-    {
-        int nNumerator_ = numerator_ + right.numerator_;
-        int nDenominator_ = denominator_ + right.denominator_;
-        return Fraction(nNumerator_, nDenominator_);
+    Fraction operator+(const Fraction& right) {
+        int newNumerator = numerator_ * right.denominator_ + right.numerator_ * denominator_;
+        int newDenominator = denominator_ * right.denominator_;
+        return Fraction(newNumerator, newDenominator);
     }
 
-    Fraction operator--()
-    {
-        int nNumerator_ = numerator_ - 1;
-        int nDenominator_ = denominator_ - 1;
-        return Fraction(nNumerator_, nDenominator_);
+    // Вычитание
+    Fraction operator-(const Fraction& right) {
+        int newNumerator = numerator_ * right.denominator_ - right.numerator_ * denominator_;
+        int newDenominator = denominator_ * right.denominator_;
+        return Fraction(newNumerator, newDenominator);
     }
 
-    Fraction operator++()
-    {
-        int nNumerator_ = numerator_ + 1;
-        int nDenominator_ = denominator_ + 1;
-        return Fraction(nNumerator_, nDenominator_);
+    // Умножение
+    Fraction operator*(const Fraction& right) {
+        int newNumerator = numerator_ * right.numerator_;
+        int newDenominator = denominator_ * right.denominator_;
+        return Fraction(newNumerator, newDenominator);
     }
 
-    Fraction operator-() 
-    {
-        int nNumerator_ = numerator_ - numerator_;
-        int nDenominator_ = denominator_ - denominator_;
-        return Fraction(nNumerator_, nDenominator_);
+    // Деление
+    Fraction operator/(const Fraction& right) {
+        if (right.numerator_ == 0) {
+            std::cerr << "Ошибка: деление на ноль!" << std::endl;
+            exit(1);
+        }
+        int newNumerator = numerator_ * right.denominator_;
+        int newDenominator = denominator_ * right.numerator_;
+        return Fraction(newNumerator, newDenominator);
     }
 
-    Fraction operator-(Fraction right)
-    {
-        int nNumerator_ = numerator_ - right.numerator_;
-        int nDenominator_ = denominator_ - right.denominator_;
-        return Fraction(nNumerator_, nDenominator_);
+    // Унарный минус (изменение знака)
+    Fraction operator-() {
+        return Fraction(-numerator_, denominator_);
     }
 
-    Fraction operator*(Fraction right)
-    {
-        int nNumerator_ = numerator_ * right.numerator_;
-        int nDenominator_ = denominator_ * right.denominator_;
-        return Fraction(nNumerator_, nDenominator_);
+    // Префиксный инкремент (++f)
+    Fraction& operator++() {
+        numerator_ += denominator_;
+        normalize();
+        return *this;
     }
 
-    Fraction operator/(Fraction right)
-    {
-        int nNumerator_ = numerator_ / right.numerator_;
-        int nDenominator_ = denominator_ / right.denominator_;
-        return Fraction(nNumerator_, nDenominator_);
+    // Префиксный декремент (--f)
+    Fraction& operator--() {
+        numerator_ -= denominator_;
+        normalize();
+        return *this;
     }
 };
 
@@ -86,6 +107,10 @@ public:
 
 int main()
 {
+
+    SetConsoleCP(1251);
+    SetConsoleOutputCP(1251);
+
     std::cout << "Введите числитель дроби 1: ";
     int num1;
     std::cin >> num1;
@@ -144,9 +169,8 @@ int main()
     std::cout << std::endl;
 
     f3 = -f1;
-    f1.print();
     std::cout << " - ";
-    f2.print();
+    f1.print();
     std::cout << " = ";
     f3.print();
     std::cout << std::endl;
